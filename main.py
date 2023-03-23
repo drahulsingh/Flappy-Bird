@@ -62,7 +62,8 @@ class Game:
         if(self.isGameOver == False):
             self.flap -= 1
             self.birdY -= self.flap
-    
+            
+    #collide function
     def isCollide(self):
         for i in range(0,7):
             if(self.birdX >= self.pipesX[i] and self.birdX <= (self.pipesX[i]+pipe.get_width())
