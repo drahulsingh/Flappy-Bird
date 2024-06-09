@@ -12,14 +12,14 @@ CLOCK = pygame.time.Clock()
 FPS = 60
 
 # Load images
-BACKGROUND = pygame.image.load("images/background.png").convert_alpha()
-BIRD = pygame.image.load("images/bird.png").convert_alpha()
-PIPE = pygame.image.load("images/pipe.png").convert_alpha()
-ROTATED_PIPE = pygame.image.load("images/rotated_pipe.png").convert_alpha()
+BACKGROUND = pygame.image.load("background.png").convert_alpha()
+BIRD = pygame.image.load("bird.png").convert_alpha()
+PIPE = pygame.image.load("pipe.png").convert_alpha()
+ROTATED_PIPE = pygame.image.load("rotated_pipe.png").convert_alpha()
 
 # Load sounds
-POINT_SOUND = pygame.mixer.Sound("sounds/sfx_point.wav")
-HIT_SOUND = pygame.mixer.Sound("sounds/sfx_hit.wav")
+POINT_SOUND = pygame.mixer.Sound("sfx_point.wav")
+HIT_SOUND = pygame.mixer.Sound("sfx_hit.wav")
 
 # Game Caption
 pygame.display.set_caption("Flappy Bird")
