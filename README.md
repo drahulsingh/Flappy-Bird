@@ -1,5 +1,8 @@
 # Flappy Bird
 
+![ViewCount](https://views.whatilearened.today/views/github/drahulsingh/Flappy-Bird.svg)
+
+## Description
 Flappy Bird is a classic arcade-style game where players control a bird, navigating it through a series of pipes. The objective is to pass through as many pipes as possible without hitting them.
 
 ## Features
