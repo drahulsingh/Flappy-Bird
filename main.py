@@ -1,155 +1,152 @@
-import pygame 
+import pygame
 import sys
 import random
 
 pygame.init()
 
-width = 1270
-heigth = 720
-screen = pygame.display.set_mode((width,heigth))
-clock = pygame.time.Clock()
-fps = 60
+# Screen settings
+WIDTH = 1270
+HEIGHT = 720
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+CLOCK = pygame.time.Clock()
+FPS = 60
 
-# images
-background = pygame.image.load("images/background.png").convert_alpha()
-bird = pygame.image.load("images/bird.png").convert_alpha()
-pipe = pygame.image.load("images/pipe.png").convert_alpha()
-rotatedPipe = pygame.image.load("images/rotated_pipe.png").convert_alpha()
+# Load images
+BACKGROUND = pygame.image.load("images/background.png").convert_alpha()
+BIRD = pygame.image.load("images/bird.png").convert_alpha()
+PIPE = pygame.image.load("images/pipe.png").convert_alpha()
+ROTATED_PIPE = pygame.image.load("images/rotated_pipe.png").convert_alpha()
 
-# sounds
-point = pygame.mixer.Sound("sounds/sfx_point.wav")
-hit = pygame.mixer.Sound("sounds/sfx_hit.wav")
+# Load sounds
+POINT_SOUND = pygame.mixer.Sound("sounds/sfx_point.wav")
+HIT_SOUND = pygame.mixer.Sound("sounds/sfx_hit.wav")
 
 # Game Caption
-pygame.display.set_caption("Flappy Bird")  
+pygame.display.set_caption("Flappy Bird")
+
 
 class Game:
     def __init__(self):
-        self.gameOn = True
-        self.birdX = 100
-        self.birdY = 100
-        self.pipesX = [width, width+200, width+400, width+600, width+800, width+1000, width+1200]
-        self.lowerPipeY = [self.randomPipe(),self.randomPipe(),self.randomPipe(),self.randomPipe(),
-            self.randomPipe(),self.randomPipe(),self.randomPipe()]
-        self.upperPipeY = [self.randomRotatedPipe(),self.randomRotatedPipe(),self.randomRotatedPipe(),self.randomRotatedPipe(),
-            self.randomRotatedPipe(),self.randomRotatedPipe(),self.randomRotatedPipe()]
+        self.reset_game()
+
+    def reset_game(self):
+        self.game_on = True
+        self.bird_x = 100
+        self.bird_y = 100
+        self.pipes_x = [WIDTH + i * 200 for i in range(7)]
+        self.lower_pipe_y = [self.random_pipe() for _ in range(7)]
+        self.upper_pipe_y = [self.random_rotated_pipe() for _ in range(7)]
         self.gravity = 0
-        self.pipeVel = 0
+        self.pipe_velocity = 0
         self.flap = 0
         self.score = 0
-        self.rotateAngle = 0
-        self.isGameOver = False
-        self.playSound = True
+        self.rotate_angle = 0
+        self.is_game_over = False
+        self.play_sound = True
 
-    def movingPipe(self):
-        for i in range(0,7):
-            self.pipesX[i] += -self.pipeVel
-        
-        for i in range(0,7):
-            if(self.pipesX[i] < -50):
-                self.pipesX[i] = width + 100
-                self.lowerPipeY[i] = self.randomPipe()
-                self.upperPipeY[i] = self.randomRotatedPipe()
+    def moving_pipes(self):
+        for i in range(7):
+            self.pipes_x[i] -= self.pipe_velocity
 
-    def randomPipe(self):
-        return random.randrange(int(heigth/2)+50, heigth-200)
-    
-    def randomRotatedPipe(self):
-        return random.randrange(-int(heigth/2)+100, -100)
+        for i in range(7):
+            if self.pipes_x[i] < -50:
+                self.pipes_x[i] = WIDTH + 100
+                self.lower_pipe_y[i] = self.random_pipe()
+                self.upper_pipe_y[i] = self.random_rotated_pipe()
+
+    @staticmethod
+    def random_pipe():
+        return random.randrange(HEIGHT // 2 + 50, HEIGHT - 200)
+
+    @staticmethod
+    def random_rotated_pipe():
+        return random.randrange(-HEIGHT // 2 + 100, -100)
 
     def flapping(self):
-        self.birdY += self.gravity
-        if(self.isGameOver == False):
+        self.bird_y += self.gravity
+        if not self.is_game_over:
             self.flap -= 1
-            self.birdY -= self.flap
-            
-    #collide function
-    def isCollide(self):
-        for i in range(0,7):
-            if(self.birdX >= self.pipesX[i] and self.birdX <= (self.pipesX[i]+pipe.get_width())
-                and ((self.birdY+bird.get_height()-15) >= self.lowerPipeY[i] or 
-                (self.birdY) <= self.upperPipeY[i]+rotatedPipe.get_height()-15)):
-                    return True
-                
-            elif(self.birdX == self.pipesX[i] and (self.birdY <= self.lowerPipeY[i] and self.birdY >= self.upperPipeY[i])):
-                if(self.isGameOver == False):
+            self.bird_y -= self.flap
+
+    def is_collide(self):
+        for i in range(7):
+            if self.bird_x >= self.pipes_x[i] and self.bird_x <= self.pipes_x[i] + PIPE.get_width() and (
+                self.bird_y + BIRD.get_height() - 15 >= self.lower_pipe_y[i] or
+                self.bird_y <= self.upper_pipe_y[i] + ROTATED_PIPE.get_height() - 15
+            ):
+                return True
+
+            if self.bird_x == self.pipes_x[i] and self.bird_y <= self.lower_pipe_y[i] and self.bird_y >= self.upper_pipe_y[i]:
+                if not self.is_game_over:
                     self.score += 1
-                    pygame.mixer.Sound.play(point)
-        
-        if(self.birdY <= 0):
+                    pygame.mixer.Sound.play(POINT_SOUND)
+
+        if self.bird_y <= 0:
             return True
-        
-        elif(self.birdY+bird.get_height() >= heigth):
+
+        if self.bird_y + BIRD.get_height() >= HEIGHT:
             self.gravity = 0
             return True
- 
+
         return False
 
-    def gameOver(self):
-        if(self.isCollide()):
-            self.isGameOver = True
-            self.screenText("Game Over!", (255,255,255), 450, 300, 84, "Fixedsys", bold=True)
-            self.screenText("Press Enter To Play Again", (255,255,255), 400, 600, 48, "Fixedsys", bold=True)
-            self.pipeVel = 0
+    def game_over(self):
+        if self.is_collide():
+            self.is_game_over = True
+            self.display_text("Game Over!", (255, 255, 255), 450, 300, 84, "Fixedsys", bold=True)
+            self.display_text("Press Enter To Play Again", (255, 255, 255), 400, 600, 48, "Fixedsys", bold=True)
+            self.pipe_velocity = 0
             self.flap = 0
-            self.rotateAngle = -90
-            if(self.playSound):
-                pygame.mixer.Sound.play(hit)
-                self.playSound =False
+            self.rotate_angle = -90
+            if self.play_sound:
+                pygame.mixer.Sound.play(HIT_SOUND)
+                self.play_sound = False
 
-    def screenText(self, text, color, x,y, size, style, bold=False):
+    @staticmethod
+    def display_text(text, color, x, y, size, style, bold=False):
         font = pygame.font.SysFont(style, size, bold=bold)
         screen_text = font.render(text, True, color)
-        screen.blit(screen_text, (x,y))
-    
-    def mainGame(self):
-        while self.gameOn:
+        SCREEN.blit(screen_text, (x, y))
+
+    def main_game(self):
+        while self.game_on:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                
+
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        if(self.isGameOver == False):
-                            self.pipeVel = 5
+                        if not self.is_game_over:
+                            self.pipe_velocity = 5
                             self.gravity = 10
                             self.flap = 20
-                            self.rotateAngle = 15
-                    
+                            self.rotate_angle = 15
+
                     if event.key == pygame.K_RETURN:
-                        newGame = Game()
-                        newGame.mainGame()
-                
+                        self.reset_game()
+
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_SPACE:
-                        self.rotateAngle = 0
+                        self.rotate_angle = 0
 
-            # blitting images
-            screen.blit(background, (0,0))
+            SCREEN.blit(BACKGROUND, (0, 0))
 
-            for i in range(0,7):
-                # lower Pipe
-                screen.blit(pipe, (self.pipesX[i], self.lowerPipeY[i]))
-                # upper pipe
-                screen.blit(rotatedPipe, (self.pipesX[i], self.upperPipeY[i]))
+            for i in range(7):
+                SCREEN.blit(PIPE, (self.pipes_x[i], self.lower_pipe_y[i]))
+                SCREEN.blit(ROTATED_PIPE, (self.pipes_x[i], self.upper_pipe_y[i]))
 
-            screen.blit(pygame.transform.rotozoom(bird, self.rotateAngle, 1), (self.birdX, self.birdY))
+            SCREEN.blit(pygame.transform.rotozoom(BIRD, self.rotate_angle, 1), (self.bird_x, self.bird_y))
 
-            # moving pipe
-            self.movingPipe()
-            # flapping
+            self.moving_pipes()
             self.flapping()
-            # game over
-            self.gameOver()
-            # displaying score
-            self.screenText(str(self.score), (255,255,255), 600, 50, 68, "Fixedsys", bold=True)
+            self.game_over()
+            self.display_text(str(self.score), (255, 255, 255), 600, 50, 68, "Fixedsys", bold=True)
 
             pygame.display.update()
-            clock.tick(fps)
-
-falppyBird = Game()
-falppyBird.mainGame()
+            CLOCK.tick(FPS)
 
 
-
+if __name__ == "__main__":
+    flappy_bird = Game()
+    flappy_bird.main_game()
