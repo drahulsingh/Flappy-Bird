@@ -52,7 +52,7 @@ Flappy Bird is a classic arcade-style game where players control a bird, navigat
 Feel free to contribute to this project by opening issues or submitting pull requests.
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
-For any inquiries or issues, please contact drahulsingh.
+For any inquiries or issues, please contact [drahulsingh](https://github.com/drahulsingh).
